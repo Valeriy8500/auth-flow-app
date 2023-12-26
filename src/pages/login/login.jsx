@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { defaultLogState } from "../../constans/constans";
 
 export const Login = () => {
-  const [value, setValue] = useState({
-    login: '',
-    password: ''
-  });
+  const [value, setValue] = useState(defaultLogState);
   const [disabled, setDisabled] = useState(true);
 
   useEffect(() => {

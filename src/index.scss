@@ -184,6 +184,7 @@
         line-height: 20px;
         color: #818C99;
         margin-bottom: 28px;
+        position: relative;
 
         .form__input {
           font-family: Arial, sans-serif;
@@ -200,6 +201,12 @@
           background: #F9FAFC;
           border: 2px solid #EBECEF;
           border-radius: 6px;
+        }
+
+        .password-error,
+        .confirm-password-error {
+          color: red;
+          position: absolute;
         }
       }
 

@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { defaultRegState } from "../../constans/constans";
 
 export const Registration = () => {
-  const [value, setValue] = useState({
-    name: '',
-    login: '',
-    password: '',
-    confirmPassword: ''
-  });
+  const [value, setValue] = useState(defaultRegState);
   const [disabled, setDisabled] = useState(true);
+  const [error, setError] = useState({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (
       value.name !== '' &&
       value.login !== '' &&
       value.password !== '' &&
-      value.confirmPassword !== ''
+      value.confirmPassword !== '' &&
+      !error.password.message &&
+      !error.confirmPassword.message
     ) {
       setDisabled(false);
     } else {
@@ -24,7 +25,9 @@ export const Registration = () => {
 
   const onBtnOkHandler = (e) => {
     e.preventDefault();
-    console.log('onBtnOkHandler');
+    setError({});
+    setValue(defaultRegState);
+    navigate("");
 
     // const newEl = {
     //   ...value,
@@ -46,11 +49,41 @@ export const Registration = () => {
     // dispatch(toogleCompanyDetailsModal(companiesDetailsState));
   };
 
-  const onChangeItem = (id, e) => {
+  const onChangeItem = (name, e) => {
     if (e.target.value.trim() === '') {
-      setValue((prev) => ({ ...prev, [id]: '' }));
+      setValue((prev) => ({ ...prev, [name]: '' }));
     } else {
-      setValue((prev) => ({ ...prev, [id]: e.target.value }));
+      let newError = { ...error, [name]: { message: "" } };
+
+      if (name === "password") {
+        setValue((prev) => ({ ...prev, [name]: e.target.value }));
+
+        if (e.target.value !== value.confirmPassword) {
+          newError = {
+            ...error,
+            password: { message: "введенные пароли не совпадают" },
+            confirmPassword: { message: "введенные пароли не совпадают" },
+          };
+        } else {
+          newError = { ...error, password: { message: "" }, confirmPassword: { message: "" } };
+        }
+      }
+      if (name === "confirmPassword") {
+        setValue((prev) => ({ ...prev, [name]: e.target.value }));
+
+        if (e.target.value !== value.password) {
+          newError = {
+            ...error,
+            password: { message: "введенные пароли не совпадают" },
+            confirmPassword: { message: "введенные пароли не совпадают" },
+          };
+        } else {
+          newError = { ...error, password: { message: "" }, confirmPassword: { message: "" } };
+        }
+      }
+
+      setValue((prev) => ({ ...prev, [name]: e.target.value }));
+      setError(newError);
     }
   };
 
@@ -67,7 +100,7 @@ export const Registration = () => {
         <label className='form__label'>
           Имя *
           <input
-            id='name'
+            name='name'
             className='form__input'
             type='text'
             placeholder=' Введите имя'
@@ -78,7 +111,7 @@ export const Registration = () => {
         <label className='form__label'>
           Логин *
           <input
-            id='login'
+            name='login'
             className='form__input'
             type='text'
             placeholder=' Введите логин'
@@ -90,25 +123,31 @@ export const Registration = () => {
         <label className='form__label'>
           Пароль *
           <input
-            id='password'
+            name='password'
             className='form__input'
             type='password'
             placeholder=' Введите пароль'
             onChange={(e) => onChangeItem('password', e)}
             value={value.password}
           />
+          <p className="password-error">
+            {error.password && error.password.message}
+          </p>
         </label>
 
         <label className='form__label'>
           Подтверждение пароля *
           <input
-            id='confirmPassword'
+            name='confirmPassword'
             className='form__input'
             type='password'
             placeholder=' Подтвердите пароль'
             onChange={(e) => onChangeItem('confirmPassword', e)}
             value={value.confirmPassword}
           />
+          <p className="confirm-password-error">
+            {error.confirmPassword && error.confirmPassword.message}
+          </p>
         </label>
 
         <p className='form_paragraph'>
