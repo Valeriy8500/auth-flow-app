@@ -37,7 +37,7 @@
         align-items: flex-end;
 
         .navigation-panel_home>h2 {
-          color: black;
+          color: #353D4B;
         }
 
         .navigation-panel_home {
@@ -66,8 +66,11 @@
 
       .home {
         margin-top: 30px;
-        font-size: 14px;
-        font-weight: normal;
+      }
+
+      .home__title {
+        font-size: 19px;
+        font-weight: 600;
       }
 
       .login-container {
@@ -244,6 +247,11 @@
         border-radius: 6px;
         color: #ffffff;
         opacity: 1;
+      }
+
+      .form__button:nth-child(2) {
+        background-color: green;
+        margin-left: 20px;
       }
 
       .form__button-dsbl {

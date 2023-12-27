@@ -1,12 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { defaultRegState } from "../../constans/constans";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { addUser } from "../../redux/users";
+import { selectorUsers } from "../../redux/selectors";
+import { generateId } from "../../shared/sharedFunction";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export const Registration = () => {
   const [value, setValue] = useState(defaultRegState);
   const [disabled, setDisabled] = useState(true);
   const [error, setError] = useState({});
+  const [show, setShow] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const usersData = useAppSelector(selectorUsers);
   const navigate = useNavigate();
+  const localStorageData = JSON.parse(localStorage.getItem("user"));
 
   useEffect(() => {
     if (
@@ -21,32 +32,33 @@ export const Registration = () => {
     } else {
       setDisabled(true);
     }
-  }, [value]);
+  }, [value, error]);
+
+  const onLogin = () => {
+    navigate("/login");
+  };
 
   const onBtnOkHandler = (e) => {
     e.preventDefault();
-    setError({});
-    setValue(defaultRegState);
-    navigate("");
+    const newId = generateId(usersData);
+    const newElement = {
+      id: newId,
+      name: value.name.trim(),
+      login: value.login.trim(),
+      password: value.password.trim()
+    };
 
-    // const newEl = {
-    //   ...value,
-    //   id: currId ? currId : value.id,
-    //   companyName: value.companyName.trim(),
-    //   employeesCount: String(value.employeesCount).trim(),
-    //   companyAddress: value.companyAddress.trim(),
-    //   employees: currId ? value.employees : [],
-    // };
+    const validateUsers = usersData.some((item) => item.login === newElement.login);
 
-    // console.log('newEl: ', newEl);
-
-    // if (currId) {
-    //   dispatch(editCompany(newEl));
-    // } else {
-    //   dispatch(addCompany(newEl));
-    // }
-
-    // dispatch(toogleCompanyDetailsModal(companiesDetailsState));
+    if (validateUsers) {
+      toast.error('Пользователь с таким логином уже зарегистрирован');
+    } else {
+      toast.success('Регистрация прошла успешно!');
+      setError({});
+      setValue(defaultRegState);
+      dispatch(addUser(newElement));
+      setShow(true);
+    }
   };
 
   const onChangeItem = (name, e) => {
@@ -86,6 +98,10 @@ export const Registration = () => {
       setError(newError);
     }
   };
+
+  if (localStorageData?.auth) {
+    return <Navigate to="/profile" />
+  }
 
   return (
     <div className='registration-container'>
@@ -163,7 +179,19 @@ export const Registration = () => {
         >
           Ок
         </button>
+
+        {show && (
+          <button
+            className='form__button'
+            form='form'
+            onClick={() => onLogin()}
+          >
+            Авторизоваться
+          </button>
+        )}
       </div>
+
+      <ToastContainer />
     </div>
   )
 };

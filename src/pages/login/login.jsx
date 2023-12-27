@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { defaultLogState } from "../../constans/constans";
+import { useAppSelector, useAppDispatch } from "../../redux/hooks";
+import { selectorUsers } from "../../redux/selectors";
+import { saveAuthStatus } from "../../redux/users";
+import { ToastContainer, toast } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 export const Login = () => {
   const [value, setValue] = useState(defaultLogState);
   const [disabled, setDisabled] = useState(true);
+
+  const dispatch = useAppDispatch();
+  const usersData = useAppSelector(selectorUsers);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (
@@ -18,35 +28,51 @@ export const Login = () => {
 
   const onBtnOkHandler = (e) => {
     e.preventDefault();
-    console.log('onBtnOkHandler');
+    const loginData = {
+      login: value.login.trim(),
+      password: value.password.trim(),
+      auth: true
+    };
 
-    // const newEl = {
-    //   ...value,
-    //   id: currId ? currId : value.id,
-    //   companyName: value.companyName.trim(),
-    //   employeesCount: String(value.employeesCount).trim(),
-    //   companyAddress: value.companyAddress.trim(),
-    //   employees: currId ? value.employees : [],
-    // };
+    const localStorageData = JSON.parse(localStorage.getItem("user"));
 
-    // console.log('newEl: ', newEl);
+    if (localStorageData) {
+      const copyUsersData = [...usersData];
+      copyUsersData.push(localStorageData);
 
-    // if (currId) {
-    //   dispatch(editCompany(newEl));
-    // } else {
-    //   dispatch(addCompany(newEl));
-    // }
+      const validateLoginByUsersData = copyUsersData.some((item) =>
+        item.login === loginData.login && item.password === loginData.password
+      );
 
-    // dispatch(toogleCompanyDetailsModal(companiesDetailsState));
+      if (validateLoginByUsersData) {
+        toast.success('Авторизация прошла успешно!');
+        setValue(defaultLogState);
+        dispatch(saveAuthStatus(loginData));
+        navigate("/profile");
+      } else {
+        toast.error('Имя пользователя или пароль введены не верно');
+      }
+    } else {
+      const validateLogin = usersData.some((item) =>
+        item.login === loginData.login && item.password === loginData.password
+      );
+
+      if (validateLogin) {
+        toast.success('Авторизация прошла успешно!');
+        setValue(defaultLogState);
+        dispatch(saveAuthStatus(loginData));
+        navigate("/profile");
+      } else {
+        toast.error('Имя пользователя или пароль введены не верно');
+      }
+    }
   };
 
-  const onChangeItem = (id, e) => {
-    console.log(e.target.value);
-
+  const onChangeItem = (name, e) => {
     if (e.target.value.trim() === '') {
-      setValue((prev) => ({ ...prev, [id]: '' }));
+      setValue((prev) => ({ ...prev, [name]: '' }));
     } else {
-      setValue((prev) => ({ ...prev, [id]: e.target.value }));
+      setValue((prev) => ({ ...prev, [name]: e.target.value }));
     }
   };
 
@@ -63,7 +89,7 @@ export const Login = () => {
         <label className='form__label'>
           Логин *
           <input
-            id='login'
+            name='login'
             className='form__input'
             type='text'
             placeholder=' Введите логин'
@@ -74,7 +100,7 @@ export const Login = () => {
         <label className='form__label'>
           Пароль *
           <input
-            id='password'
+            name='password'
             className='form__input'
             type='password'
             placeholder=' Введите пароль'
@@ -97,6 +123,8 @@ export const Login = () => {
           Ок
         </button>
       </div>
+
+      <ToastContainer />
     </div>
   )
 };
